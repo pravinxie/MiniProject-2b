@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_456a0fba8800768b95fc35006554b6f4 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_456a0fba8800768b95fc35006554b6f4" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_456a0fba8800768b95fc35006554b6f4 = L.map(
+                "map_456a0fba8800768b95fc35006554b6f4",
+                {
+                    center: [19.0492423, 72.863352],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 14,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_7119413c44a5fe931ef77102fea8d198 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_7119413c44a5fe931ef77102fea8d198.addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+            var marker_4ee87a14530b800133810540f7fbb948 = L.marker(
+                [19.0492423, 72.863352],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+            var icon_8263601cdb5a696baa7029cd03594281 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_45cdc9ecf4c43600e1b43fa007e51ab2 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_e885f5a67923d8931d53a653e362a583 = $(`<div id="html_e885f5a67923d8931d53a653e362a583" style="width: 100.0%; height: 100.0%;">You are here!</div>`)[0];
+                popup_45cdc9ecf4c43600e1b43fa007e51ab2.setContent(html_e885f5a67923d8931d53a653e362a583);
+            
+        
+
+        marker_4ee87a14530b800133810540f7fbb948.bindPopup(popup_45cdc9ecf4c43600e1b43fa007e51ab2)
+        ;
+
+        
+    
+    
+                marker_4ee87a14530b800133810540f7fbb948.setIcon(icon_8263601cdb5a696baa7029cd03594281);
+            
+    
+            var marker_41237040d49fca6113bea10e97530462 = L.marker(
+                [19.0193018, 72.8485199],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+        var popup_9bc8fcaff3d854d8322573f2359a7525 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_bdeaa9de5564de2ee34acfc079370c18 = $(`<div id="html_bdeaa9de5564de2ee34acfc079370c18" style="width: 100.0%; height: 100.0%;"><b>Pulse Cardiac</b><br>Specialization: Cardiologist<br>Rating: 5</div>`)[0];
+                popup_9bc8fcaff3d854d8322573f2359a7525.setContent(html_bdeaa9de5564de2ee34acfc079370c18);
+            
+        
+
+        marker_41237040d49fca6113bea10e97530462.bindPopup(popup_9bc8fcaff3d854d8322573f2359a7525)
+        ;
+
+        
+    
+    
+            var marker_e10aa7da5818122ea19d018b24dc43d5 = L.marker(
+                [19.0609272, 72.8984272],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+        var popup_e8d9a3b6b4f6fd1d2f350ce177cee250 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_0c9bdf0db20245c411beb9d62abc69fb = $(`<div id="html_0c9bdf0db20245c411beb9d62abc69fb" style="width: 100.0%; height: 100.0%;"><b>Dr Brijesh</b><br>Specialization: Cardiologist<br>Rating: 5</div>`)[0];
+                popup_e8d9a3b6b4f6fd1d2f350ce177cee250.setContent(html_0c9bdf0db20245c411beb9d62abc69fb);
+            
+        
+
+        marker_e10aa7da5818122ea19d018b24dc43d5.bindPopup(popup_e8d9a3b6b4f6fd1d2f350ce177cee250)
+        ;
+
+        
+    
+    
+            var marker_6840950d048bc0ec59717e1542826a54 = L.marker(
+                [19.0023722, 72.8154567],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+        var popup_a6df5004ec93b627e1d3fefc2fcdb3fe = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_2916c1cfe8a1c9f4930a90239f9aacaa = $(`<div id="html_2916c1cfe8a1c9f4930a90239f9aacaa" style="width: 100.0%; height: 100.0%;"><b>Dr. SRINIVAS KUDVA - Cardiologist Near Me Mumbai | Angioplasty Doctor, TAVR, Heart Failure & Valve Specialist in Worli</b><br>Specialization: Cardiologist<br>Rating: 5</div>`)[0];
+                popup_a6df5004ec93b627e1d3fefc2fcdb3fe.setContent(html_2916c1cfe8a1c9f4930a90239f9aacaa);
+            
+        
+
+        marker_6840950d048bc0ec59717e1542826a54.bindPopup(popup_a6df5004ec93b627e1d3fefc2fcdb3fe)
+        ;
+
+        
+    
+    
+            var marker_3263ea837f68d60ece6069a0c2fa8fa1 = L.marker(
+                [19.0814156, 72.88511629999999],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+        var popup_72e78bb60c809c36bdc4009ac73c9d6d = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_84808f4e1574fb4492c5a04afae5aa41 = $(`<div id="html_84808f4e1574fb4492c5a04afae5aa41" style="width: 100.0%; height: 100.0%;"><b>Dr Deepak Shejol</b><br>Specialization: Cardiologist<br>Rating: 5</div>`)[0];
+                popup_72e78bb60c809c36bdc4009ac73c9d6d.setContent(html_84808f4e1574fb4492c5a04afae5aa41);
+            
+        
+
+        marker_3263ea837f68d60ece6069a0c2fa8fa1.bindPopup(popup_72e78bb60c809c36bdc4009ac73c9d6d)
+        ;
+
+        
+    
+    
+            var marker_de05fb91486fdbddfc796400fec61166 = L.marker(
+                [19.0709563, 72.8343081],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+        var popup_66c98299ae5bab9ac22eca5d588d3ef8 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_89b88d2418ad80a6d50c6503e67ca2f0 = $(`<div id="html_89b88d2418ad80a6d50c6503e67ca2f0" style="width: 100.0%; height: 100.0%;"><b>Dr. Suresh Vijan - Heart Specialist Doctor Near Me Mumbai | Percutaneous Valve Replacement, TAVI, TAVR, Angioplasty Procedure</b><br>Specialization: Cardiologist<br>Rating: 5</div>`)[0];
+                popup_66c98299ae5bab9ac22eca5d588d3ef8.setContent(html_89b88d2418ad80a6d50c6503e67ca2f0);
+            
+        
+
+        marker_de05fb91486fdbddfc796400fec61166.bindPopup(popup_66c98299ae5bab9ac22eca5d588d3ef8)
+        ;
+
+        
+    
+    
+            var marker_551d79a63f881876defca24b8d78bfd0 = L.marker(
+                [19.0273476, 72.8532314],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+        var popup_8b246ca6e83b9de7728a2cb5efd58ced = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_22f15e9f23f1ff4d4950c344ad729ddb = $(`<div id="html_22f15e9f23f1ff4d4950c344ad729ddb" style="width: 100.0%; height: 100.0%;"><b>Diligent Heart Clinic by Dr Girish Sabnis, DM : ECG | Echocardiography | Stress Test | DSE | Cardiologist in Dadar Matunga</b><br>Specialization: Cardiologist<br>Rating: 5</div>`)[0];
+                popup_8b246ca6e83b9de7728a2cb5efd58ced.setContent(html_22f15e9f23f1ff4d4950c344ad729ddb);
+            
+        
+
+        marker_551d79a63f881876defca24b8d78bfd0.bindPopup(popup_8b246ca6e83b9de7728a2cb5efd58ced)
+        ;
+
+        
+    
+    
+            var marker_c2d355df903d28e2c7ec6e9821f13d8e = L.marker(
+                [19.081841, 72.9090282],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+        var popup_f4efacc9b1aea34ff419a1306b542174 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_1c34a29fd801a72ce9615dfd38269f77 = $(`<div id="html_1c34a29fd801a72ce9615dfd38269f77" style="width: 100.0%; height: 100.0%;"><b>Dr. Komal Pawar - Cardiologist in Mumbai I Angioplasty & Angiography, Pacemaker Expert, 2D ECHO. Female Cardiologist Mumbai</b><br>Specialization: Cardiologist<br>Rating: 4.9</div>`)[0];
+                popup_f4efacc9b1aea34ff419a1306b542174.setContent(html_1c34a29fd801a72ce9615dfd38269f77);
+            
+        
+
+        marker_c2d355df903d28e2c7ec6e9821f13d8e.bindPopup(popup_f4efacc9b1aea34ff419a1306b542174)
+        ;
+
+        
+    
+    
+            var marker_3e30bcd198c41017441f549142dad6c0 = L.marker(
+                [19.0549351, 72.82698599999999],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+        var popup_15ce967c5860397c8bdca70735bdc54e = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_7aef4adc7343293a0fb8befcc5ccef67 = $(`<div id="html_7aef4adc7343293a0fb8befcc5ccef67" style="width: 100.0%; height: 100.0%;"><b>Dr Kunal Sinkar Heart That Cares Clinic</b><br>Specialization: Cardiologist<br>Rating: 4.9</div>`)[0];
+                popup_15ce967c5860397c8bdca70735bdc54e.setContent(html_7aef4adc7343293a0fb8befcc5ccef67);
+            
+        
+
+        marker_3e30bcd198c41017441f549142dad6c0.bindPopup(popup_15ce967c5860397c8bdca70735bdc54e)
+        ;
+
+        
+    
+    
+            var marker_1c3d181420543b8fb88903fceef68f35 = L.marker(
+                [19.0535469, 72.88708629999999],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+        var popup_d9d372b0d3c11deaccba07379df40ad4 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_502b9d04d3f5a842514a58c4fb462da7 = $(`<div id="html_502b9d04d3f5a842514a58c4fb462da7" style="width: 100.0%; height: 100.0%;"><b>Dr.Amit Patil - Best Cardiologist in Chembur, Heart Specialist Doctor in Mumbai | ECG | 2D ECHO | Angiography | Angioplasty</b><br>Specialization: Cardiologist<br>Rating: 4.9</div>`)[0];
+                popup_d9d372b0d3c11deaccba07379df40ad4.setContent(html_502b9d04d3f5a842514a58c4fb462da7);
+            
+        
+
+        marker_1c3d181420543b8fb88903fceef68f35.bindPopup(popup_d9d372b0d3c11deaccba07379df40ad4)
+        ;
+
+        
+    
+    
+            var marker_836fd32f54930b5e5a543eabcdb02130 = L.marker(
+                [19.0197646, 72.8459292],
+                {
+}
+            ).addTo(map_456a0fba8800768b95fc35006554b6f4);
+        
+    
+        var popup_f4f3bf3fe4fd0864d1c3811cfb631d0d = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_ec435a792a1d1352caf9ffb537a914e5 = $(`<div id="html_ec435a792a1d1352caf9ffb537a914e5" style="width: 100.0%; height: 100.0%;"><b>Sujyot Heart Clinic</b><br>Specialization: Cardiologist<br>Rating: 4.9</div>`)[0];
+                popup_f4f3bf3fe4fd0864d1c3811cfb631d0d.setContent(html_ec435a792a1d1352caf9ffb537a914e5);
+            
+        
+
+        marker_836fd32f54930b5e5a543eabcdb02130.bindPopup(popup_f4f3bf3fe4fd0864d1c3811cfb631d0d)
+        ;
+
+        
+    
+</script>
+</html>

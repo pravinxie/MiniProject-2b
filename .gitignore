@@ -1,0 +1,7 @@
+# Exclude myenv and node_modules anywhere in the repo
+myenv/
+node_modules/
+
+# Exclude myenv and node_modules in subdirectories
+**/myenv/
+**/node_modules/

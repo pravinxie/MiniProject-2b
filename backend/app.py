@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 # API Keys and LLM endpoint
-GOMAPS_API_KEY = "AlzaSynxEpONL1eflXG5stb4aJ7emJtXktYwg4C"
+GOMAPS_API_KEY = "your-api-key-here"
 OLLAMA_API_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL_NAME = "llama3.2:latest"
 

@@ -181,7 +181,7 @@ function HomePage() {
             </Link>
 
             {/* Feature 3 */}
-            <Link to="/random2" className="block">
+            <Link to="/EasyPatientData" className="block">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -194,9 +194,9 @@ function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3 text-center">Medication Management</h3>
+                <h3 className="text-xl font-semibold text-gray-800 mb-3 text-center">Easy Patient Data</h3>
                 <p className="text-gray-600 text-center">
-                  Track your medications, receive timely reminders, and get alerts about potential drug interactions to ensure your treatment plan is effective and safe.
+                People providing their health information through a form get a brief summary and crucial points flagged for medical assessment and medical review.
                 </p>
               </motion.div>
             </Link>

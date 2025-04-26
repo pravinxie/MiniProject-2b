@@ -1,201 +1,25 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import requests
 import folium
 import os
-from flask_cors import CORS  # Import CORS support
-from difflib import SequenceMatcher
+from textblob import TextBlob
 import PyPDF2
 import re
 from transformers import pipeline
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-GOMAPS_API_KEY = "AlzaSy-9evlt4H1QMwiZx_6-wvl0QXAvaeUwW8N"
+CORS(app)
 
-# Mapping of medical specialties to common symptoms
-SPECIALTIES = {
-    "Cardiologist": ["Chest pain", "High blood pressure", "Shortness of breath", "Irregular heartbeat", "Swelling in legs"],
-    "Dermatologist": ["Skin rash", "Acne", "Eczema", "Psoriasis", "Skin infections"],
-    "Neurologist": ["Headache", "Seizures", "Memory loss", "Numbness", "Dizziness"],
-    "Orthopedic": ["Joint pain", "Fracture", "Back pain", "Arthritis", "Muscle stiffness"],
-    "Pediatrician": ["Fever in children", "Cough in kids", "Growth issues", "Vaccination needs", "Frequent infections"],
-    "ENT Specialist": ["Ear pain", "Sore throat", "Hearing loss", "Nasal congestion", "Tinnitus"],
-    "General Physician": ["Fever", "Cough", "Body pain", "Fatigue", "General weakness"],
-    "Endocrinologist": ["Diabetes", "Thyroid issues", "Hormonal imbalance", "Weight gain", "Excessive sweating"],
-    "Gastroenterologist": ["Abdominal pain", "Indigestion", "Constipation", "Diarrhea", "Bloody stools"],
-    "Pulmonologist": ["Chronic cough", "Asthma", "Shortness of breath", "Lung infections", "Wheezing"],
-    "Nephrologist": ["Kidney stones", "Frequent urination", "Swelling in legs", "Blood in urine", "High creatinine levels"],
-    "Hematologist": ["Anemia", "Easy bruising", "Excessive bleeding", "Leukemia symptoms", "Blood clotting issues"],
-    "Oncologist": ["Unexplained weight loss", "Lumps in body", "Chronic fatigue", "Abnormal bleeding", "Night sweats"],
-    "Urologist": ["Painful urination", "Urinary tract infections", "Erectile dysfunction", "Kidney stones", "Frequent urination"],
-    "Rheumatologist": ["Joint pain", "Autoimmune disorders", "Chronic fatigue", "Muscle stiffness", "Swollen joints"],
-    "Ophthalmologist": ["Blurry vision", "Eye redness", "Cataracts", "Dry eyes", "Glaucoma"],
-    "Psychiatrist": ["Depression", "Anxiety", "Mood swings", "Hallucinations", "Sleep disorders"],
-    "Allergist/Immunologist": ["Skin allergies", "Food allergies", "Asthma", "Hay fever", "Frequent infections"],
-    "Infectious Disease Specialist": ["Persistent fever", "HIV/AIDS", "Tuberculosis", "Malaria", "Chronic infections"],
-    "Geriatrician": ["Memory loss", "Weakness in elderly", "Falls", "Chronic pain", "Osteoporosis"],
-    "Andrologist": ["Male infertility", "Low testosterone", "Erectile dysfunction", "Prostate issues", "Testicular pain"],
-    "Obstetrician/Gynecologist (OB-GYN)": ["Menstrual irregularities", "Pelvic pain", "Pregnancy-related issues", "PCOS", "Menopause symptoms"],
-    "Plastic Surgeon": ["Cosmetic concerns", "Burn scars", "Reconstructive surgery", "Cleft lip", "Skin grafting"],
-    "Thoracic Surgeon": ["Lung cancer", "Collapsed lung", "Chest trauma", "Esophageal disorders", "Heart surgery"],
-    "Vascular Surgeon": ["Varicose veins", "Poor circulation", "Leg ulcers", "Aneurysms", "Blood clots"],
-    "Colorectal Surgeon": ["Hemorrhoids", "Anal pain", "Rectal bleeding", "Colon cancer", "Fecal incontinence"],
-    "Neurosurgeon": ["Brain tumors", "Spinal cord injuries", "Severe migraines", "Stroke complications", "Nerve pain"],
-    "Pain Specialist": ["Chronic pain", "Back pain", "Post-surgical pain", "Fibromyalgia", "Neuralgia"],
-    "Hepatologist": ["Liver disease", "Hepatitis", "Jaundice", "Liver cirrhosis", "Fatty liver"],
-    "Proctologist": ["Hemorrhoids", "Rectal pain", "Anal fistulas", "Constipation", "Colon disorders"],
-    "Toxicologist": ["Poisoning", "Chemical exposure", "Drug overdose", "Toxic reactions", "Industrial exposure"],
-    "Sleep Specialist": ["Insomnia", "Sleep apnea", "Narcolepsy", "Restless leg syndrome", "Snoring"],
-    "Sports Medicine Specialist": ["Sports injuries", "Tendonitis", "Fractures", "Muscle sprains", "Concussions"],
-    "Podiatrist": ["Foot pain", "Plantar fasciitis", "Ingrown toenails", "Heel spurs", "Diabetic foot ulcers"],
-    "Osteopath": ["Body pain", "Joint stiffness", "Muscle spasms", "Chronic fatigue", "Spinal misalignment"],
-    "Rehabilitation Medicine Specialist": ["Stroke recovery", "Spinal cord injury", "Muscle weakness", "Post-surgery rehab", "Mobility issues"],
-    "Geneticist": ["Inherited disorders", "Genetic testing", "Rare syndromes", "Chromosomal abnormalities", "Metabolic disorders"],
-    "Medical Examiner": ["Unexplained deaths", "Autopsies", "Forensic pathology", "Toxicology analysis", "Crime scene evaluations"],
-    "Nuclear Medicine Specialist": ["Cancer imaging", "Thyroid scans", "Bone scans", "PET scans", "Radioactive therapy"],
-    "Clinical Pharmacologist": ["Drug reactions", "Medication management", "Pharmacokinetics", "Adverse effects", "Dosage recommendations"],
-    "Dietitian/Nutritionist": ["Obesity", "Nutritional deficiencies", "Meal planning", "Metabolic disorders", "Diet-related illnesses"],
-    "Hyperbaric Medicine Specialist": ["Decompression sickness", "Carbon monoxide poisoning", "Wound healing", "Oxygen therapy", "Burn treatment"],
-    "Medical Geneticist": ["Rare genetic disorders", "Hereditary conditions", "Prenatal genetic screening", "Gene therapy", "Metabolic diseases"],
-    "Gastrointestinal Surgeon": ["Gallbladder disease", "Hernia", "Stomach cancer", "Appendicitis", "Bowel obstruction"],
-    "Breast Surgeon": ["Breast cancer", "Lumps in breast", "Mastectomy", "Breast reduction", "Breast reconstruction"],
-    "Emergency Medicine Specialist": ["Severe trauma", "Heart attacks", "Stroke", "Respiratory distress", "Acute poisoning"],
-    "Radiation Oncologist": ["Cancer radiation therapy", "Tumor treatment", "Side effects of radiation", "Radioactive implants", "Targeted radiation therapy"],
-    "Clinical Microbiologist": ["Bacterial infections", "Viral infections", "Fungal infections", "Antibiotic resistance", "Lab testing"],
-    "Tropical Medicine Specialist": ["Malaria", "Dengue fever", "Cholera", "Zika virus", "Yellow fever"],
-    "Public Health Specialist": ["Epidemiology", "Infectious disease outbreaks", "Vaccination programs", "Community health issues", "Health policy planning"],
-    "Occupational Medicine Specialist": ["Workplace injuries", "Ergonomics", "Industrial disease", "Toxic exposure at work", "Hearing loss prevention"],
-    "Holistic Medicine Practitioner": ["Alternative therapies", "Mind-body medicine", "Herbal treatments", "Acupuncture", "Ayurveda"],
-    "Ayurvedic Doctor": ["Digestive issues", "Stress-related disorders", "Chronic fatigue", "Skin diseases", "Detoxification"],
-    "Homeopathic Doctor": ["Chronic diseases", "Allergies", "Migraines", "Respiratory issues", "Hormonal imbalances"],
-}
+# API Keys and LLM endpoint
+GOMAPS_API_KEY = "AlzaSynxEpONL1eflXG5stb4aJ7emJtXktYwg4C"
+OLLAMA_API_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL_NAME = "llama3.2:latest"
 
-def is_similar(a, b, threshold=0.8):
-    """Return True if strings a and b are similar above the given threshold."""
-    return SequenceMatcher(None, a.lower(), b.lower()).ratio() >= threshold
+# Store last searched symptoms globally
+last_searched_symptoms = []
 
-def get_matched_specialties(user_symptoms):
-    """
-    Compare each user symptom against the symptoms for each specialty using fuzzy matching.
-    If a user symptom is similar enough to any of the specialty's symptoms,
-    add that specialty to the matched set.
-    """
-    matched = set()
-    for specialty, symptom_list in SPECIALTIES.items():
-        for user_symptom in user_symptoms:
-            for specialty_symptom in symptom_list:
-                if is_similar(user_symptom, specialty_symptom):
-                    matched.add(specialty)
-                    break
-    return matched
-
-@app.route('/')
-def home():
-    return jsonify({
-        "message": "Welcome to the Doctor Finder API",
-        "endpoints": {
-            "/map": "POST - Find nearby hospitals based on location and symptoms",
-            "/city_hospitals": "POST - Find hospitals in a specified city based on symptoms"
-        }
-    })
-
-@app.route('/map', methods=['POST'])
-def generate_map():
-    data = request.json
-    latitude = data.get("latitude")
-    longitude = data.get("longitude")
-    symptoms = data.get("symptoms", [])
-
-    if not latitude or not longitude:
-        return jsonify({"error": "Invalid location data"}), 400
-
-    # Use fuzzy matching on the user provided symptoms (as given, without TextBlob correction)
-    matched_specialties = get_matched_specialties(symptoms)
-    
-    if not matched_specialties:
-        return jsonify({"error": "No matching specialists found"}), 400
-
-    hospital_data = fetch_hospitals(latitude, longitude, matched_specialties)
-    save_map(latitude, longitude, hospital_data)
-
-    return jsonify({"message": "Map generated successfully", "places": hospital_data})
-
-@app.route('/city_hospitals', methods=['POST'])
-def city_hospitals():
-    data = request.json
-    city = data.get("city")
-    symptoms = data.get("symptoms", [])
-    
-    if not city:
-        return jsonify({"error": "City name is required"}), 400
-
-    # Get fuzzy-matched specialties based on user symptoms
-    matched_specialties = get_matched_specialties(symptoms)
-    hospital_data = fetch_hospitals_by_city(city, matched_specialties)
-    
-    return jsonify({"places": hospital_data})
-
-def fetch_hospitals(latitude, longitude, specialties):
-    hospitals = []
-    for specialty in specialties:
-        url = "https://maps.gomaps.pro/maps/api/place/nearbysearch/json"
-        params = {
-            "location": f"{latitude},{longitude}",
-            "radius": 5000,
-            "keyword": specialty,
-            "key": GOMAPS_API_KEY
-        }
-        response = requests.get(url, params=params)
-        data = response.json()
-
-        if "results" in data:
-            for place in data["results"]:
-                hospitals.append({
-                    "name": place.get("name", "Unknown"),
-                    "lat": place["geometry"]["location"]["lat"],
-                    "lng": place["geometry"]["location"]["lng"],
-                    "rating": place.get("rating", "N/A"),
-                    "specialization": specialty,
-                    "address": place.get("vicinity", "Unknown")
-                })
-    return sorted(hospitals, key=lambda x: x.get("rating", 0), reverse=True)[:10]
-
-def fetch_hospitals_by_city(city, specialties):
-    hospitals = []
-    for specialty in specialties:
-        url = "https://maps.gomaps.pro/maps/api/place/textsearch/json"
-        params = {
-            "query": f"{specialty} hospitals in {city}",
-            "key": GOMAPS_API_KEY
-        }
-        response = requests.get(url, params=params)
-        data = response.json()
-
-        if "results" in data:
-            for place in data["results"]:
-                hospitals.append({
-                    "name": place.get("name", "Unknown"),
-                    "rating": place.get("rating", "N/A"),
-                    "specialization": specialty,
-                    "address": place.get("formatted_address", "Unknown")
-                })
-    return sorted(hospitals, key=lambda x: x.get("rating", 0), reverse=True)[:10]
-
-def save_map(latitude, longitude, hospital_data):
-    if not os.path.exists("static"):
-        os.makedirs("static")
-    map_obj = folium.Map(location=[latitude, longitude], zoom_start=14)
-    folium.Marker([latitude, longitude], popup="You are here!", icon=folium.Icon(color="blue")).add_to(map_obj)
-    
-    for place in hospital_data:
-        folium.Marker(
-            [place["lat"], place["lng"]],
-            popup=f"<b>{place['name']}</b><br>Specialization: {place['specialization']}<br>Rating: {place['rating']}"
-        ).add_to(map_obj)
-    map_obj.save("static/map.html")
-
-
-# Load the BioBERT NER pipeline
+# Initialize BioBERT NER pipeline for PDF processing
 nlp = pipeline(
     "ner",
     model="Ishan0612/biobert_medical_ner",
@@ -203,125 +27,276 @@ nlp = pipeline(
     aggregation_strategy="simple"
 )
 
+# Utility functions for PDF text extraction and highlighting
+
 def extract_text_from_pdf(pdf_file):
-    """
-    Extracts text from an uploaded PDF file using PyPDF2.
-    Then returns the raw text (without heavy formatting).
-    We'll handle the major cleanup in highlight_diseases.
-    """
-    pdf_reader = PyPDF2.PdfReader(pdf_file)
+    reader = PyPDF2.PdfReader(pdf_file)
     text = ""
-    for page in pdf_reader.pages:
-        text += page.extract_text()
+    for page in reader.pages:
+        page_text = page.extract_text() or ""
+        text += page_text + "\n"
     return text
+
 
 def merge_subwords(ner_results):
-    """
-    Merges subword tokens from the NER output.
-    """
-    merged_entities = []
+    merged = []
     i = 0
     while i < len(ner_results):
-        if ner_results[i]['entity_group'] == 'LABEL_1':
-            disease = ner_results[i]['word']
+        ent = ner_results[i]
+        if ent['entity_group'] == 'LABEL_1':
+            disease = ent['word']
             i += 1
+            # merge subsequent subwords
             while i < len(ner_results) and ner_results[i]['entity_group'] == 'LABEL_2':
                 token = ner_results[i]['word']
-                if token.startswith("##"):
-                    token = token[2:]
-                    disease += token
+                if token.startswith('##'):
+                    disease += token[2:]
                 else:
-                    disease += " " + token
+                    disease += ' ' + token
                 i += 1
-            merged_entities.append(disease)
+            merged.append(disease)
         else:
             i += 1
-    return merged_entities
+    return merged
 
-def remove_duplicates_preserve_order(diseases):
-    """
-    Removes duplicate disease names (case-insensitive) while preserving order.
-    """
-    unique_diseases = []
+
+def remove_duplicates_preserve_order(items):
     seen = set()
-    for d in diseases:
-        d_lower = d.lower()
-        if d_lower not in seen:
-            unique_diseases.append(d)
-            seen.add(d_lower)
-    return unique_diseases
+    unique = []
+    for it in items:
+        low = it.lower()
+        if low not in seen:
+            unique.append(it)
+            seen.add(low)
+    return unique
+
 
 def highlight_diseases(raw_text, diseases):
-    """
-    1. Clean up the raw PDF text: remove newlines, collapse multiple spaces, etc.
-    2. For each disease, convert internal spaces to \s+ so that multi-word diseases match even
-       if there's more than one space in the text.
-    3. Use a negative lookbehind/lookahead on [A-Za-z0-9_] so punctuation or parentheses
-       do not block matches.
-    """
-    # --- Step 1: Clean up the text thoroughly ---
-    # Replace ALL newlines with spaces
     text = raw_text.replace('\n', ' ')
-    # Collapse multiple spaces into a single space
-    text = re.sub(r'\s+', ' ', text)
-    text = text.strip()
-
-    # --- Step 2: Deduplicate diseases first ---
-    diseases_deduped = remove_duplicates_preserve_order(diseases)
-
-    # --- Step 3: Sort diseases by length (longest first) to avoid partial matches overshadowing longer ones ---
-    diseases_sorted = sorted(diseases_deduped, key=len, reverse=True)
-
-    # --- Step 4: For each disease, build a flexible pattern and highlight ---
-    for disease in diseases_sorted:
-        # Escape special regex chars
-        escaped = re.escape(disease)
-        # Replace the escaped space ('\ ') with '\s+' to allow multi-spaces
-        # e.g. "chest pain" -> "chest\s+pain"
-        escaped = re.sub(r'\\ ', r'\\s+', escaped)
-
-        # Negative lookbehind/lookahead on [A-Za-z0-9_] so punctuation won't block a match
-        pattern = re.compile(
-            rf'(?<![A-Za-z0-9_]){escaped}(?![A-Za-z0-9_])',
-            re.IGNORECASE
-        )
-
-        # Highlight with a <span>
+    text = re.sub(r'\s+', ' ', text).strip()
+    diseases = remove_duplicates_preserve_order(diseases)
+    # sort by length to replace longer first
+    diseases.sort(key=len, reverse=True)
+    for disease in diseases:
+        esc = re.escape(disease)
+        esc = re.sub(r'\\ ', r'\\s+', esc)
+        pattern = re.compile(rf'(?<![A-Za-z0-9_]){esc}(?![A-Za-z0-9_])', re.IGNORECASE)
         text = pattern.sub(lambda m: f'<span class="highlight">{m.group(0)}</span>', text)
-
     return text
+
+# TextBlob-based spelling correction
+
+def correct_spelling(symptoms):
+    return [str(TextBlob(s).correct()) for s in symptoms]
+
+# Query Llama to classify symptoms to specialties
+
+def get_specialist_from_llm(symptoms):
+    prompt = f"""
+You are a highly knowledgeable **medical AI assistant** specializing in **accurate symptom classification**. Your goal is to analyze given symptoms, **correct any spelling mistakes**, and classify them into the most **relevant medical specialties**.
+
+### Instructions:
+1. Correct spelling mistakes in the given symptoms before classification.
+2. Identify the correct medical specialty based on the corrected symptoms.
+3. If multiple symptoms suggest different specialties, list all relevant ones.
+4. If symptoms indicate general conditions (e.g., fever, headache), return General Practice.
+5. If symptoms indicate serious diseases (e.g., HIV/AIDS, cancer), return the appropriate specialist.
+6. Return only the specialties in a comma-separated format.
+7. Do not provide explanations, only the list of specialties.
+
+Symptoms: {', '.join(symptoms)}
+"""
+    payload = {
+        "model": OLLAMA_MODEL_NAME,
+        "prompt": prompt,
+        "stream": False
+    }
+    resp = requests.post(OLLAMA_API_URL, json=payload)
+    if resp.status_code == 200:
+        out = resp.json().get('response', '')
+        return [s.strip() for s in out.split(',') if s.strip()]
+    return []
+
+# Fetch nearby hospitals using GoMaps API
+
+def fetch_hospitals(latitude, longitude, specialties):
+    results = []
+    for spec in specialties:
+        params = {
+            'location': f"{latitude},{longitude}",
+            'radius': 5000,
+            'keyword': spec,
+            'key': GOMAPS_API_KEY
+        }
+        data = requests.get(
+            'https://maps.gomaps.pro/maps/api/place/nearbysearch/json',
+            params=params
+        ).json()
+        for place in data.get('results', []):
+            rating = place.get('rating', 0.0)
+            try:
+                rating = float(rating)
+            except:
+                rating = 0.0
+            results.append({
+                'name': place.get('name'),
+                'lat': place['geometry']['location']['lat'],
+                'lng': place['geometry']['location']['lng'],
+                'rating': rating,
+                'specialization': spec,
+                'address': place.get('vicinity')
+            })
+    # top 10 by rating
+    return sorted(results, key=lambda x: x['rating'], reverse=True)[:10]
+
+# Fetch hospitals by city text search
+
+def fetch_hospitals_by_city(city, specialties):
+    results = []
+    for spec in specialties:
+        params = {
+            'query': f"{spec} hospitals in {city}",
+            'key': GOMAPS_API_KEY
+        }
+        data = requests.get(
+            'https://maps.gomaps.pro/maps/api/place/textsearch/json',
+            params=params
+        ).json()
+        for place in data.get('results', []):
+            results.append({
+                'name': place.get('name'),
+                'rating': place.get('rating', 'N/A'),
+                'specialization': spec,
+                'address': place.get('formatted_address')
+            })
+    return sorted(results, key=lambda x: x.get('rating', 0), reverse=True)[:10]
+
+# Save map to static folder
+
+def save_map(latitude, longitude, hospital_data):
+    if not os.path.exists('static'):
+        os.makedirs('static')
+    m = folium.Map(location=[latitude, longitude], zoom_start=14)
+    folium.Marker([latitude, longitude], popup='YOU ARE HERE', icon=folium.Icon(color='red')).add_to(m)
+    for h in hospital_data:
+        folium.Marker(
+            [h['lat'], h['lng']],
+            popup=f"<b>{h['name']}</b><br>Specialty: {h['specialization']}<br>Rating: {h['rating']}",
+            icon=folium.Icon(color='green')
+        ).add_to(m)
+    m.save('static/map.html')
+
+# Routes
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # PDF upload & NER
     if request.method == 'POST':
         if 'file' not in request.files:
-            return jsonify({"error": "No file uploaded"}), 400
+            return jsonify({'error': 'No file uploaded'}), 400
+        pdf = request.files['file']
+        raw = extract_text_from_pdf(pdf)
+        ner_res = nlp(raw)
+        diseases = remove_duplicates_preserve_order(merge_subwords(ner_res))
+        highlighted = highlight_diseases(raw, diseases)
+        return jsonify({'diseases': diseases, 'highlighted_text': highlighted})
+    return jsonify({'message': 'Please upload a PDF file via POST request'})
 
-        pdf_file = request.files['file']
+@app.route('/api/generate-summary', methods=['POST'])
+def generate_summary():
+    data = request.json
+    # build patient form text
+    form = f"""
+Name: {data.get('name')}
+DOB: {data.get('dob')}
+Gender: {data.get('gender')}
+Phone: {data.get('phone')}
+Email: {data.get('email')}
+Emergency Contact: {data.get('emergencyContactName')}, {data.get('emergencyContactPhone')}
 
-        # 1. Extract raw text from PDF
-        raw_text = extract_text_from_pdf(pdf_file)
+Medical History:
+Chronic Diseases: {'Yes - ' + data.get('chronicDiseasesDetails') if data.get('chronicDiseases') == 'Yes' else 'None'}
+Surgeries: {'Yes - ' + data.get('surgeriesDetails') if data.get('surgeries') == 'Yes' else 'None'}
+Allergies: {'Yes - ' + data.get('allergiesDetails') if data.get('allergies') == 'Yes' else 'None'}
+Medications: {'Yes - ' + data.get('medicationsDetails') if data.get('medications') == 'Yes' else 'None'}
+Skin Conditions: {'Yes - ' + data.get('skinConditionsDetails') if data.get('skinConditions') == 'Yes' else 'None'}
 
-        # 2. Run NER
-        ner_results = nlp(raw_text)
+Current Routine:
+Daily Skincare: {data.get('dailySkincareProducts')}
+Exfoliation: {data.get('exfoliationFrequency')}
+Prescription: {'Yes - ' + data.get('prescriptionTreatmentsDetails') if data.get('prescriptionTreatments') == 'Yes' else 'None'}
+Sunscreen Use: {data.get('wearSunscreen')}
 
-        # 3. Merge subwords -> disease phrases
-        diseases_merged = merge_subwords(ner_results)
+Family History:
+Skin Conditions: {'Yes - ' + data.get('familySkinConditionsDetails') if data.get('familySkinConditions') == 'Yes' else 'None'}
+Cancer History: {'Yes - ' + data.get('familyCancerHistoryDetails') if data.get('familyCancerHistory') == 'Yes' else 'None'}
 
-        # 4. Remove duplicates for final display
-        diseases = remove_duplicates_preserve_order(diseases_merged)
+Current Skin Issues:
+Primary Issue: {data.get('primarySkinIssue')}
+Duration: {data.get('issueDuration')}
+Progress: {data.get('issueProgress')}
+Treatment Tried: {'Yes - ' + data.get('treatedBeforeDetails') if data.get('treatedBefore') == 'Yes' else 'None'}
+Pain/Irritation: {data.get('painIrritation')}
 
-        # 5. Highlight diseases in the text
-        highlighted_text = highlight_diseases(raw_text, diseases)
+Additional Info:
+Other Conditions: {data.get('otherConditions')}
+Notes: {data.get('additionalNotes')}
+"""
+    prompt = f"""
+You are a medical assistant. Generate only a concise patient summary and list key points to note. Do not give age.
 
-        # Return JSON response for React frontend
-        return jsonify({
-            "diseases": diseases,
-            "highlighted_text": highlighted_text
-        })
-    
-    # For GET requests, just return a simple message
-    return jsonify({"message": "Please upload a PDF file via POST request"})
+{form}
+
+Please output:
+Patient Summary:
+"<summary>"
+
+Points to be Noted:
+- <point 1>
+- <point 2>
+"""
+    try:
+        resp = requests.post(OLLAMA_API_URL, json={'model': OLLAMA_MODEL_NAME, 'prompt': prompt, 'stream': False})
+        if resp.status_code == 200:
+            text = resp.json().get('response', '')
+            return jsonify({'text': text})
+        return jsonify({'text': 'AI service error'}), 500
+    except Exception as e:
+        return jsonify({'text': 'Failed to generate summary.'}), 500
+
+@app.route('/map', methods=['POST'])
+def generate_map():
+    global last_searched_symptoms
+    data = request.json
+    lat = data.get('latitude')
+    lng = data.get('longitude')
+    symptoms = data.get('symptoms', [])
+    if not lat or not lng:
+        return jsonify({'error': 'Invalid location data'}), 400
+    if not symptoms:
+        return jsonify({'error': 'Please enter symptoms'}), 400
+    symptoms = correct_spelling(symptoms)
+    last_searched_symptoms = symptoms
+    specs = get_specialist_from_llm(symptoms)
+    if not specs:
+        return jsonify({'error': 'No matching specialists found'}), 400
+    hospitals = fetch_hospitals(lat, lng, specs)
+    save_map(lat, lng, hospitals)
+    url = f"{request.host_url.rstrip('/')}/static/map.html"
+    return jsonify({'message': 'Map generated', 'places': hospitals, 'map_url': url})
+
+@app.route('/city_hospitals', methods=['POST'])
+def city_hospitals():
+    global last_searched_symptoms
+    data = request.json
+    city = data.get('city')
+    if not city:
+        return jsonify({'error': 'City name is required'}), 400
+    if not last_searched_symptoms:
+        return jsonify({'error': 'Search symptoms first'}), 400
+    specs = get_specialist_from_llm(last_searched_symptoms)
+    hospitals = fetch_hospitals_by_city(city, specs)
+    return jsonify({'places': hospitals})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

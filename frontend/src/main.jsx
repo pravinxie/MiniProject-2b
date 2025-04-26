@@ -6,10 +6,9 @@ import Layout from '../Layout.jsx'
 import HomePage from './HomePage/HomePage.jsx'
 import LoginPage from './LoginPage/LoginPage.jsx'
 import SignupPage from './SignupPage/SignupPage.jsx'
-import FindDoctorsNearMe from './FindDoctorsNearMe/FindDoctorsNearMe.jsx'
-import DiseaseExtraction from './DiseaseExtraction/DiseaseExtraction.jsx'
 import DiseaseExtraction_2 from './DiseaseExtraction_2/DiseaseExtraction_2.jsx'
-
+import PatientForm from './PatientForm/PatientForm.jsx'
+import HospitalFinder from './HospitalFinder/HospitalFinder.jsx'
 
 
 const router = createBrowserRouter(
@@ -18,9 +17,10 @@ const router = createBrowserRouter(
       <Route path='' element={<HomePage/>} />
       <Route path='login' element={<LoginPage/>} />
       <Route path='signup' element={<SignupPage/>} />
-      <Route path='FindDoctorsNearMe' element={<FindDoctorsNearMe/>} />
+      <Route path='FindDoctorsNearMe' element={<HospitalFinder/>} />
       {/* <Route path='DiseaseExtraction' element={<DiseaseExtraction/>} /> */}
       <Route path='DiseaseExtraction_2' element={<DiseaseExtraction_2/>} />
+      <Route path='EasyPatientData' element={<PatientForm/>} />
     </Route>
   )
 )

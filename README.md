@@ -63,7 +63,7 @@
 
 - Python
 - Node.js 
-- Ollama (for local LLM support)
+- Ollama (for local LLM support -- make sure the required model is running in the background )
 
 ## Usage
 
